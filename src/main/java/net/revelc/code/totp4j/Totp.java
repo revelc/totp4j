@@ -89,10 +89,11 @@ public class Totp {
   }
 
   private static byte[] decodeBase32(String encoded) {
+    var upperCaseEncoded = encoded.toUpperCase();
     var value = BigInteger.ZERO;
     int numEncodedChars = 0;
-    for (int i = 0; i < encoded.length(); i++) {
-      var nextBits = bitValues.get(encoded.charAt(i));
+    for (int i = 0; i < upperCaseEncoded.length(); i++) {
+      var nextBits = bitValues.get(upperCaseEncoded.charAt(i));
       if (nextBits != null) {
         numEncodedChars++;
         value = value.shiftLeft(5).add(BigInteger.valueOf(nextBits));
