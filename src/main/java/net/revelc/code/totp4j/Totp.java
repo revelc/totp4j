@@ -30,7 +30,6 @@ import javax.crypto.spec.SecretKeySpec;
 public class Totp {
 
   public static final long TOTP_INTERVAL = 30L;
-  public static final long PRINT_INTERVAL = 2L;
   public static final int NUM_DIGITS = 6; // 6, 7, or 8
 
   public static void main(String[] args) {
@@ -40,8 +39,9 @@ public class Totp {
     }
     var key = args[0];
     generate(key);
-    Executors.newScheduledThreadPool(1).scheduleAtFixedRate(() -> generate(key), PRINT_INTERVAL,
-        PRINT_INTERVAL, TimeUnit.SECONDS);
+    Executors.newScheduledThreadPool(1).scheduleAtFixedRate(() -> generate(key),
+        TOTP_INTERVAL - Instant.now().getEpochSecond() % TOTP_INTERVAL, TOTP_INTERVAL,
+        TimeUnit.SECONDS);
   }
 
   public static void generate(String key) {
@@ -60,7 +60,7 @@ public class Totp {
   }
 
   private static byte[] getMovingFactor() {
-    var intervalsSinceEpoch = Instant.now().toEpochMilli() / 1000L / TOTP_INTERVAL;
+    var intervalsSinceEpoch = Instant.now().getEpochSecond() / TOTP_INTERVAL;
     var time = BigInteger.valueOf(intervalsSinceEpoch).toByteArray();
     var movingFactor = new byte[8];
     System.arraycopy(time, 0, movingFactor, movingFactor.length - time.length, time.length);
@@ -105,9 +105,14 @@ public class Totp {
     var numBytes = (numEncodedChars * 5 - numBitsOvershot) / 8;
     byte[] result = value.toByteArray();
     if (result.length < numBytes) {
-      byte[] padded = new byte[numBytes];
-      System.arraycopy(result, 0, padded, numBytes - result.length, result.length);
-      return padded;
+      byte[] zeroPadded = new byte[numBytes];
+      System.arraycopy(result, 0, zeroPadded, numBytes - result.length, result.length);
+      return zeroPadded;
+    }
+    if (result.length > numBytes) {
+      byte[] truncateZeroPadding = new byte[numBytes];
+      System.arraycopy(result, result.length - numBytes, truncateZeroPadding, 0, numBytes);
+      return truncateZeroPadding;
     }
     return result;
   }
