@@ -19,13 +19,13 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Arrays;
-
+import java.util.List;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 public class Otp {
 
-  private Options options;
+  protected Options options;
 
   public Otp(Options options) {
     this.options = options;
@@ -36,26 +36,56 @@ public class Otp {
   }
 
   public void generate() {
-    var counter = getCounter();
-    for (String key : options.getKeys()) {
-      var hmac = hmac(Base32.decode(key), counter);
-      int offset = hmac[hmac.length - 1] & 0x0F;
-      var result = Arrays.copyOfRange(hmac, offset, offset + 4);
-      result[0] &= 0x7f;
-      var otp = new BigInteger(result).longValueExact();
 
-      int digits = options.getDigits();
-      System.out.printf("%0" + digits + "d%n", otp % (long) Math.pow(10, digits));
+    List<String> keys = options.getKeys();
+    if (keys.isEmpty()) {
+      throw new IllegalStateException("No user keys provided");
+    }
+
+    for (String key : keys) {
+      String otp = generate(key);
+      System.out.println(otp);
     }
   }
 
-  private byte[] getCounter() {
+  private String format(long otp, int digits) {
+    return String.format("%0" + digits + "d", otp % (long) Math.pow(10, digits));
+  }
+
+  public String generate(String key) {
+    List<String> keys = options.getKeys();
+    if (keys.isEmpty()) {
+      throw new IllegalStateException("No user keys provided");
+    }
+
+    BigInteger counter = getCounter();
+    return generate(key, counter);
+  }
+
+  protected String generate(String key, BigInteger counter) {
+
+    var cBytes = getCounterBytes(counter);
+    var hmac = hmac(Base32.decode(key), cBytes);
+    int offset = hmac[hmac.length - 1] & 0x0F;
+    var result = Arrays.copyOfRange(hmac, offset, offset + 4);
+    result[0] &= 0x7f;
+    var otp = new BigInteger(result).longValueExact();
+
+    int digits = options.getDigits();
+    return format(otp, digits);
+  }
+
+  public BigInteger getCounter() {
     // counter is number of intervals since the epoch in TOTP; in HOTP the counter is specified
-    var counter =
-        BigInteger.valueOf(options.isTotp() ? Instant.now().getEpochSecond() / options.getTimestep()
-            : options.getCounter()).toByteArray();
+    return BigInteger
+        .valueOf(options.isTotp() ? Instant.now().getEpochSecond() / options.getTimestep()
+            : options.getCounter());
+  }
+
+  private byte[] getCounterBytes(BigInteger counter) {
+    var cBytes = counter.toByteArray();
     var padded = new byte[8];
-    System.arraycopy(counter, 0, padded, padded.length - counter.length, counter.length);
+    System.arraycopy(cBytes, 0, padded, padded.length - cBytes.length, cBytes.length);
     return padded;
   }
 

@@ -1,0 +1,59 @@
+apply plugin: 'java'
+
+sourceCompatibility = '11'
+targetCompatibility = '11'
+version = '0.1'
+
+def projectName = 'totpui'
+
+/*
+ * This simple task makes building the TOTP UI as simple as:
+ * 
+ * >gradle buildTotpUi
+ *
+ * (This was needed at the time of writing due to unsatisfied test compile dependencies)
+ */
+def description = "Pattern: buildTotpUi: Build TOTP UI to input key and display password"
+tasks.addRule(description) { String taskName ->
+	
+	
+	task(taskName, type: Tar) {
+	
+		buildDir.mkdirs()
+	
+	    destinationDir file('dist')
+	    //baseName "totpui"
+	    compression Compression.GZIP
+	    extension 'tar.gz'
+	    into projectName
+
+	    from ('./scripts') { // for linux
+	        include 'totpui.sh'
+	        fileMode 0755
+		}
+	    	    
+	    from ('./scripts') { // for mac
+	        include 'totpui.sh'
+	        rename '(.*).sh','$1.command'
+	        fileMode 0755
+		}
+	    
+	    from ('./scripts') { // for windows
+	        include 'totpui.bat'
+		}
+	    	    
+		from (jar) {
+			into 'lib'
+		}
+	}	
+}
+
+jar {
+	archiveName = "${projectName}.jar"
+}
+
+task cleanDist {
+    doLast {
+        delete file('dist')
+    }
+}
