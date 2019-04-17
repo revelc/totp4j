@@ -104,6 +104,10 @@ public class Options {
   private boolean help = false;
   private int timestep = 30;
 
+  private Options() {
+    // copy constructor
+  }
+
   private Options(String[] args) {
     Objects.requireNonNull(args, "Arguments list must not be null");
     this.help = args.length == 0;
@@ -191,6 +195,24 @@ public class Options {
 
   public static Options parse(String[] args) {
     return new Options(args);
+  }
+
+  /**
+   * Returns a new copy of the given options, using the given key
+   * 
+   * @param newkey the new key
+   * @return the new options
+   */
+  public Options withKeys(String newkey) {
+    Options copy = new Options();
+    copy.counter = counter;
+    copy.base32 = base32;
+    copy.digits = digits;
+    copy.algorithm = algorithm;
+    copy.totp = totp;
+    copy.timestep = timestep;
+    copy.keys = List.of(newkey);
+    return copy;
   }
 
   /**
