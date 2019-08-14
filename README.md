@@ -21,6 +21,12 @@ http://code.revelc.net/totp4j
 
 A TOTP implementation in Java
 
+To build:
+
+```
+mvn clean verify
+```
+
 A basic GUI can be run with:
 
 ```
