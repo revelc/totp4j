@@ -11,7 +11,16 @@
 #  limitations under the License.
 
 language: java
-
+# speed up builds; don't use cache with default install step
+cache:
+  directories:
+    - $HOME/.m2
+install: echo NOOP Skipping pre-fetch of Maven dependencies
 jdk:
-  - oraclejdk8
-
+  - openjdk11
+before_script:
+  - unset _JAVA_OPTIONS
+env:
+  - BUILD_CMD="mvn clean verify javadoc:jar"
+script:
+  - $BUILD_CMD
