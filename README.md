@@ -21,6 +21,12 @@ http://code.revelc.net/totp4j
 
 A TOTP implementation in Java
 
+A basic GUI can be run with:
+
+```
+mvn exec:java -Dexec.mainClass=net.revelc.code.otp.totp.TotpUi
+```
+
 This plugin uses [Semantic Versioning 2.0.0][1] for its own versioning. Its
 public API is the names of the goals and configuration options.
 
