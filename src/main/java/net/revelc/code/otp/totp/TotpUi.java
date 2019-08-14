@@ -1,13 +1,57 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.revelc.code.otp.totp;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.font.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.font.FontRenderContext;
+import java.awt.font.GlyphVector;
+import java.awt.font.TextLayout;
 import java.awt.geom.Rectangle2D;
-import javax.swing.*;
+
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+import javax.swing.WindowConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+
 import net.revelc.code.otp.totp.TotpGenerator.Totp;
 
 /**
@@ -78,6 +122,8 @@ public class TotpUi {
     Font font = OTP_KEY_FONT;
     keyField = new JTextField(40) {
 
+      private static final long serialVersionUID = 1L;
+
       //
       // Overridden to draw 'hint' text
       //
@@ -105,7 +151,7 @@ public class TotpUi {
         TextLayout layout = new TextLayout(hint, italic, frc);
         Rectangle2D sbounds = layout.getBounds();
 
-        int x = (int) ((w / 2) - (sbounds.getWidth() / 2));
+        int x = (int) ((w - sbounds.getWidth()) / 2);
         int y = (int) (h - sbounds.getHeight());
         y = (int) sbounds.getHeight();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -212,6 +258,8 @@ public class TotpUi {
     panel.setBackground(bgColor);
 
     JPanel progressPanel = new JPanel(new BorderLayout()) {
+
+      private static final long serialVersionUID = 1L;
 
       @Override
       protected void paintComponent(Graphics g) {
